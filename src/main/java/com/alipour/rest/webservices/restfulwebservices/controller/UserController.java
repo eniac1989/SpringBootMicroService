@@ -10,6 +10,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 /**
  * @author Paniz Alipour
  */
@@ -36,7 +38,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/users")
-    private ResponseEntity<Object> addUser(@RequestBody User user) {
+    private ResponseEntity<Object> addUser(@Valid @RequestBody User user) {
         User savedUser = userDaoService.save(user);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
