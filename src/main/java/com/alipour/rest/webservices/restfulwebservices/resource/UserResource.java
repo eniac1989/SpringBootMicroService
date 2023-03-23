@@ -1,6 +1,8 @@
-package com.alipour.rest.webservices.restfulwebservices.controller;
+package com.alipour.rest.webservices.restfulwebservices.resource;
 
+import com.alipour.rest.webservices.restfulwebservices.entity.Post;
 import com.alipour.rest.webservices.restfulwebservices.exceptionmgr.UserNotFoundException;
+import com.alipour.rest.webservices.restfulwebservices.repository.UserRepository;
 import com.alipour.rest.webservices.restfulwebservices.service.UserDaoService;
 import com.alipour.rest.webservices.restfulwebservices.entity.User;
 import org.springframework.hateoas.EntityModel;
@@ -12,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -20,36 +23,52 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Paniz Alipour
  */
 @RestController
-public class UserController {
+public class UserResource {
 
     private UserDaoService userDaoService;
+    private UserRepository userRepository;
 
-    public UserController(UserDaoService userDaoService) {
-        this.userDaoService = userDaoService;
+    public UserResource(UserDaoService service, UserRepository repository) {
+        this.userDaoService = service;
+        this.userRepository = repository;
     }
 
-    @GetMapping(path = "/users")
+    @GetMapping(path = "/jpa/users")
     List<User> findAllUsers() {
-        return userDaoService.findAll();
+        return userRepository.findAll();
     }
 
-    @GetMapping(path = "/users/{id}")
+    @GetMapping(path = "/jpa/users/{id}")
     private EntityModel<User> findUser(@PathVariable int id) throws UserNotFoundException {
-        User findOne = userDaoService.findOne(id);
-        if (findOne == null)
+        Optional<User> findOne = userRepository.findById(id);
+        if (findOne==null)
             throw new UserNotFoundException("id: " + id);
         //"all-users",SERVER_PATH +"/USERS"
         //retrieveAllUsers
-        EntityModel<User> entityModel = EntityModel.of(findOne);
+        EntityModel<User> entityModel = EntityModel.of(findOne.get());
         WebMvcLinkBuilder link = linkTo(methodOn(this.getClass()).findAllUsers());
         entityModel.add(link.withRel("all-users"));
         return entityModel;
 
     }
 
-    @PostMapping(path = "/users")
+    @GetMapping(path = "/jpa/users/{id}/posts")
+    private List<Post> retreivePostOfUser(@PathVariable int id) throws UserNotFoundException {
+
+        Optional<User> findOne = userRepository.findById(id);
+
+        if (findOne==null)
+            throw new UserNotFoundException("id: " + id);
+        List<Post> posts = findOne.get().getPosts();
+
+        return posts;
+    }
+
+
+
+    @PostMapping(path = "/jpa/users")
     private ResponseEntity<Object> addUser(@Valid @RequestBody User user) {
-        User savedUser = userDaoService.save(user);
+        User savedUser = userRepository.save(user);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedUser.getId())
@@ -57,12 +76,11 @@ public class UserController {
         return ResponseEntity.created(location).build();
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/jpa/users/{id}")
     private void deleteUser(@PathVariable Integer id) {
-        if (userDaoService.findOne(id) == null)
+        if (userRepository.findById(id) == null)
             throw new UserNotFoundException(" user with id: " + id + " not found");
-        userDaoService.deleteUser(id);
+        userRepository.deleteById(id);
     }
-
 
 }

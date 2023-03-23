@@ -1,4 +1,4 @@
-package com.alipour.rest.webservices.restfulwebservices.user;
+package com.alipour.rest.webservices.restfulwebservices.entity;
 
 public class PersonV2 {
 

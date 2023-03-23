@@ -1,14 +1,10 @@
 package com.alipour.rest.webservices.restfulwebservices.controller;
 
-import com.alipour.rest.webservices.restfulwebservices.user.Name;
-import com.alipour.rest.webservices.restfulwebservices.user.PersonV1;
-import com.alipour.rest.webservices.restfulwebservices.user.PersonV2;
-import com.alipour.rest.webservices.restfulwebservices.user.User;
+import com.alipour.rest.webservices.restfulwebservices.entity.Name;
+import com.alipour.rest.webservices.restfulwebservices.entity.PersonV1;
+import com.alipour.rest.webservices.restfulwebservices.entity.PersonV2;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.nio.file.Path;
-import java.util.List;
 
 @RestController
 public class VersioningPersonController {

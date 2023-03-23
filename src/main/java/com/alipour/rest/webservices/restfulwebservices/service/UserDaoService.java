@@ -1,6 +1,6 @@
 package com.alipour.rest.webservices.restfulwebservices.service;
 
-import com.alipour.rest.webservices.restfulwebservices.user.User;
+import com.alipour.rest.webservices.restfulwebservices.entity.User;
 import org.springframework.stereotype.Component;
 
 
