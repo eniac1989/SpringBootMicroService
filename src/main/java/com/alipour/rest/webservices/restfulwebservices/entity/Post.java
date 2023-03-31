@@ -1,6 +1,7 @@
 package com.alipour.rest.webservices.restfulwebservices.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 /**
  * @author Paniz Alipour
@@ -13,6 +14,7 @@ public class Post {
     @GeneratedValue
     private Integer id;
 
+    @Size(max = 200,message = "description is too long")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,6 +34,14 @@ public class Post {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

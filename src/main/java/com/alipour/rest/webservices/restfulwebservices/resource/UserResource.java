@@ -1,10 +1,11 @@
 package com.alipour.rest.webservices.restfulwebservices.resource;
 
 import com.alipour.rest.webservices.restfulwebservices.entity.Post;
+import com.alipour.rest.webservices.restfulwebservices.entity.User;
 import com.alipour.rest.webservices.restfulwebservices.exceptionmgr.UserNotFoundException;
+import com.alipour.rest.webservices.restfulwebservices.repository.PostRepository;
 import com.alipour.rest.webservices.restfulwebservices.repository.UserRepository;
 import com.alipour.rest.webservices.restfulwebservices.service.UserDaoService;
-import com.alipour.rest.webservices.restfulwebservices.entity.User;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +28,12 @@ public class UserResource {
 
     private UserDaoService userDaoService;
     private UserRepository userRepository;
+    private PostRepository postRepository;
 
-    public UserResource(UserDaoService service, UserRepository repository) {
+    public UserResource(UserDaoService service, UserRepository repository, PostRepository postRepository) {
         this.userDaoService = service;
         this.userRepository = repository;
+        this.postRepository = postRepository;
     }
 
     @GetMapping(path = "/jpa/users")
@@ -41,7 +44,7 @@ public class UserResource {
     @GetMapping(path = "/jpa/users/{id}")
     private EntityModel<User> findUser(@PathVariable int id) throws UserNotFoundException {
         Optional<User> findOne = userRepository.findById(id);
-        if (findOne==null)
+        if (findOne == null)
             throw new UserNotFoundException("id: " + id);
         //"all-users",SERVER_PATH +"/USERS"
         //retrieveAllUsers
@@ -57,14 +60,29 @@ public class UserResource {
 
         Optional<User> findOne = userRepository.findById(id);
 
-        if (findOne==null)
+        if (findOne == null)
             throw new UserNotFoundException("id: " + id);
         List<Post> posts = findOne.get().getPosts();
 
         return posts;
     }
 
+    @PostMapping(path = "/jpa/users/{id}/posts")
+    private ResponseEntity<Post> createPostOfUser(@PathVariable int id,@Valid @RequestBody Post post) throws UserNotFoundException {
 
+        Optional<User> findUser = userRepository.findById(id);
+
+        if (findUser == null)
+            throw new UserNotFoundException("id: " + id);
+
+        post.setUser(findUser.get());
+        Post savedPost = postRepository.save(post);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedPost.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
+    }
 
     @PostMapping(path = "/jpa/users")
     private ResponseEntity<Object> addUser(@Valid @RequestBody User user) {
